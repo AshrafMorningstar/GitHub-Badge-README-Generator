@@ -36,6 +36,18 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ config, setConfig, onGene
             />
           </div>
 
+          <div className="space-y-2">
+            <label className="text-sm text-slate-400">GitHub Username (Optional)</label>
+            <input
+              type="text"
+              value={config.githubUsername}
+              onChange={(e) => setConfig(prev => ({ ...prev, githubUsername: e.target.value }))}
+              className="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+              placeholder="e.g. monalisa"
+            />
+            <p className="text-xs text-slate-500">Enter to check real progress & personalize.</p>
+          </div>
+
           <div className="flex items-center justify-between">
             <label className="text-sm text-slate-400">Generate Hero Image</label>
             <div 

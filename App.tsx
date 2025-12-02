@@ -2,10 +2,11 @@ import React, { useState, useCallback } from 'react';
 import SettingsPanel from './components/SettingsPanel';
 import PreviewArea from './components/PreviewArea';
 import { AppConfig, GenerationStep } from './types';
-import { fetchLatestAchievementsData, generateReadmeText, generateReadmeHero } from './services/geminiService';
+import { fetchLatestAchievementsData, fetchUserAchievements, generateReadmeText, generateReadmeHero } from './services/geminiService';
 
 const DEFAULT_CONFIG: AppConfig = {
   repoName: "The Ultimate Guide to GitHub Achievements & Profile Badges 🏆",
+  githubUsername: "",
   includeHeroImage: true,
   includeSearchData: true,
 };
@@ -18,13 +19,24 @@ function App() {
   const handleGenerate = useCallback(async () => {
     setStep(GenerationStep.SEARCHING);
     let searchContext = "";
+    let userContext = "";
     let heroImageUrl: string | null = null;
     let generatedText = "";
 
     try {
       // 1. Search Grounding (Optional but recommended)
       if (config.includeSearchData) {
-        searchContext = await fetchLatestAchievementsData();
+        // Run general search and user search in parallel if username exists
+        const promises: Promise<string>[] = [fetchLatestAchievementsData()];
+        if (config.githubUsername) {
+          promises.push(fetchUserAchievements(config.githubUsername));
+        }
+        
+        const results = await Promise.all(promises);
+        searchContext = results[0];
+        if (results.length > 1) {
+          userContext = results[1];
+        }
       } else {
         searchContext = "Use your internal knowledge about GitHub Achievements.";
       }
@@ -41,7 +53,7 @@ function App() {
       await new Promise(r => setTimeout(r, 500));
       
       setStep(GenerationStep.WRITING);
-      generatedText = await generateReadmeText(searchContext, config.repoName, heroImageUrl);
+      generatedText = await generateReadmeText(searchContext, userContext, config.repoName, heroImageUrl);
 
       setMarkdown(generatedText);
       setStep(GenerationStep.DONE);

@@ -27,11 +27,36 @@ export const fetchLatestAchievementsData = async (): Promise<string> => {
 };
 
 /**
+ * Searches for a specific user's GitHub achievements.
+ */
+export const fetchUserAchievements = async (username: string): Promise<string> => {
+  if (!username) return "";
+  
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-3-pro-preview", // Use Pro for better search synthesis
+      contents: `Search for GitHub user "${username}" achievements, badges, and public profile highlights. Find what badges they currently have (e.g. Mars 2020, Arctic Code Vault, Pull Shark, etc.). Return a summary of their confirmed badges.`,
+      config: {
+        tools: [{ googleSearch: {} }],
+      },
+    });
+
+    const text = response.text;
+    if (!text) return `Could not find specific data for user ${username}.`;
+    return `User "${username}" Data: ${text}`;
+  } catch (error) {
+    console.error("User search failed:", error);
+    return `Failed to search for user ${username}.`;
+  }
+};
+
+/**
  * Generates the README markdown using the Thinking model for complex structuring.
  * Uses gemini-3-pro-preview with a high thinking budget.
  */
 export const generateReadmeText = async (
-  contextData: string, 
+  contextData: string,
+  userContext: string,
   repoName: string,
   heroImageUrl: string | null
 ): Promise<string> => {
@@ -45,6 +70,15 @@ export const generateReadmeText = async (
 
     Here is the latest data about GitHub Achievements to reference:
     ${contextData}
+
+    ${userContext ? `
+    IMPORTANT: The user has provided their GitHub username. Here is what was found about them:
+    ${userContext}
+    
+    PLEASE ADD A SECTION: "## 👤 User Progress: ${userContext.match(/User "([^"]+)"/)?.[1] || 'Your Profile'}"
+    In this section, list the badges that were found for this user as "Verified/Earned". 
+    If no specific badges were found in the search, just mention "Connect your profile to track progress" or similar generic text, but do not hallucinate earned badges if the search was inconclusive.
+    ` : ''}
 
     ### Core Design & Structure Mandates:
 

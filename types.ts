@@ -20,6 +20,7 @@ export enum GenerationStep {
 
 export interface AppConfig {
   repoName: string;
+  githubUsername: string;
   includeHeroImage: boolean;
   includeSearchData: boolean;
 }
