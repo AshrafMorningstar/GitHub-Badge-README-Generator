@@ -12,6 +12,7 @@ export interface GeneratedContent {
 export enum GenerationStep {
   IDLE = 'IDLE',
   SEARCHING = 'SEARCHING',
+  GALLERY = 'GALLERY', // New step for interactive badge selection
   THINKING = 'THINKING',
   WRITING = 'WRITING',
   DRAWING = 'DRAWING',
@@ -23,4 +24,19 @@ export interface AppConfig {
   githubUsername: string;
   includeHeroImage: boolean;
   includeSearchData: boolean;
+}
+
+export type BadgeCategory = 'Earnable' | 'Retired' | 'Highlight' | 'Custom';
+export type BadgeRarity = 'Common' | 'Rare' | 'Epic' | 'Legendary';
+
+export interface Badge {
+  id: string;
+  name: string;
+  emoji: string;
+  description: string;
+  category: BadgeCategory;
+  rarity: BadgeRarity;
+  isOwned: boolean;
+  howToEarn: string;
+  tiers: string[]; // e.g., ["Bronze", "Silver", "Gold"]
 }
